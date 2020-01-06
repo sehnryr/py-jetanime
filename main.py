@@ -1,11 +1,10 @@
-from jetanime import Jetanime, getEpList, getGounLimitedUrl, getTitle
+from jetanime import getList, getEpList, getGounLimitedUrl, getTitle
 from lib import download, sizeFile
 
 # Search for anime :
 search = str(input('Enter search : '))
 
-jetanime = Jetanime()
-_list = jetanime.getList()
+_list = getList()
 
 matching = []
 for content in _list:

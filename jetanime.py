@@ -3,26 +3,22 @@ import re
 import unidecode
 from urllib.parse import urljoin
 
-class Jetanime():
-    def __init__(self):
-        session = HTMLSession()
-        self.url = 'https://www.jetanime.cc'
-        self.r = session.get(self.url)
-        self.r.html.render()
-        self.soup = self.r.html.find('body', first=True)
+def getList():
+    session = HTMLSession()
+    url = 'https://www.jetanime.cc'
+    r = session.get(url)
+    r.html.render()
+    soup = r.html.find('body', first=True)
+    options = soup.find('option')
 
-    def getList(self):
+    animes = []
+    for option in options:
+        name = unidecode.unidecode(option.text)
+        url = urljoin(url, option.attrs['value'])
+        animes.append((name, url))
 
-        options = self.soup.find('option')
+    return dict(animes)
 
-        animes = []
-        for option in options:
-            name = unidecode.unidecode(option.text)
-            url = urljoin(self.url, option.attrs['value'])
-            animes.append((name, url))
-
-        return dict(animes)
-    
 def getTitle(url):
     session = HTMLSession()
     r = session.get(url)
