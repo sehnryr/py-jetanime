@@ -1,5 +1,5 @@
 venv/
 __pycache__/
 .vscode/
-output.py
-search.py
+# ignore the file literally named output.py
+# ignore the file literally named search.py
