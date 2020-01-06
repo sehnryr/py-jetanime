@@ -61,8 +61,7 @@ def getGounLimitedUrl(url):
     a = soup.find('p')
 
     def Find(string): 
-        search = 'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-        url = re.findall(search, string) 
+        url = re.findall(r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', string) 
         return url 
 
     for i in a:
