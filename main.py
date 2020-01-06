@@ -48,5 +48,5 @@ name = getTitle(url)
 
 fileext = link.split('/')
 
-print(f'[*] Downloading test file of size {sizeFile(link)} B...')
+print(f'[*] Downloading file of size {sizeFile(link)} B...')
 download(link, f"{name}{str(fileext[-1])[-4:]}")
