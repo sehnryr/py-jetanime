@@ -25,10 +25,3 @@ def sizeFile(url):
     r = requests.head(url)
 
     return f"{int(r.headers['Content-Length']):n}"
-
-def line(arg):
-    line = ''
-    for _ in range(len(arg) + 5):
-        line += '-'
-    line = f"{line}\n"
-    return line
