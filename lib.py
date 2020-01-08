@@ -72,3 +72,15 @@ def match(_list, search):
             matching.append(content)
             matching.sort()
     return matching
+
+def isInt(arg):
+    if arg:
+        try:
+            arg = int(arg)
+            return arg
+        except ValueError:
+            print("Oops!  That was no valid number.  Try again...")
+            exit()
+    else:
+        print("Oops!  There where no value here.  Try again...")
+        exit()
