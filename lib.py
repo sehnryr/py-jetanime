@@ -63,7 +63,7 @@ def enumerates(arg):
     for idx, match in enumerate(arg):
         animes += f"{idx + 1} : {match}\n"
     animes += f"{idx + 2} : Cancel\n"
-    return animes
+    return animes, idx
 
 def match(_list, search):
     matching = []
