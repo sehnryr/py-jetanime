@@ -29,7 +29,7 @@ def sizeFile(url):
 
 def line(arg):
     line = ''
-    for _ in range(len(arg) + 2):
+    for _ in range(len(arg) + 5):
         line += '-'
     line = f"{line}\n"
     return line
@@ -83,4 +83,12 @@ def isInt(arg):
             exit()
     else:
         print("Oops!  There where no value here.  Try again...")
+        exit()
+
+def isSelection(_int, arg):
+    if _int >= arg + 2:
+        print("Exiting ...")
+        exit()
+    elif _int <= 0:
+        print("The value does not match ..")
         exit()

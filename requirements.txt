@@ -1,2 +1,3 @@
 requests_html
 unidecode
+windows-curses
