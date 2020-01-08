@@ -1,5 +1,6 @@
 import sys
 import requests
+import curses
 import locale
 locale.setlocale(locale.LC_ALL,"")
 
@@ -28,7 +29,46 @@ def sizeFile(url):
 
 def line(arg):
     line = ''
-    for _ in range(len(arg) + 5):
+    for _ in range(len(arg) + 2):
         line += '-'
     line = f"{line}\n"
     return line
+
+def searching(arg):
+    screen = curses.initscr()
+    screen.addstr(f"{arg}")
+    screen.refresh()
+    curses.noecho()
+    search = ''
+    while True:
+        key_input = screen.getch()
+        if key_input == 10:
+            break
+        elif key_input == 8:
+            screen.clear()
+            search = search[:-1]
+            screen.addstr(f"{arg}{search}")
+        else:
+            screen.clear()
+            search += chr(key_input)
+            screen.addstr(f"{arg}{search}")
+            
+    screen.clear()
+    curses.endwin()
+
+    return search
+
+def enumerates(arg):
+    animes = ''
+    for idx, match in enumerate(arg):
+        animes += f"{idx + 1} : {match}\n"
+    animes += f"{idx + 2} : Cancel\n"
+    return animes
+
+def match(_list, search):
+    matching = []
+    for content in _list:
+        if search.lower() in content.lower():
+            matching.append(content)
+            matching.sort()
+    return matching
