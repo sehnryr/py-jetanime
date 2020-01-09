@@ -3,7 +3,7 @@ import re
 import unidecode
 from urllib.parse import urljoin
 
-def getList():
+def getAnimeList():
     session = HTMLSession()
     url = 'https://www.jetanime.cc'
     r = session.get(url)
@@ -31,7 +31,7 @@ def getTitle(url):
             break
     return t.text
     
-def getEpList(url):
+def getEpisodeList(url):
     session = HTMLSession()
     r = session.get(url)
     r.html.render()
