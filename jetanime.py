@@ -1,53 +1,45 @@
 from requests_html import HTMLSession
 import re
-import unidecode
-from urllib.parse import urljoin
+from unidecode import unidecode
+from urllib.parse import urljoin, urlparse
+
+global jetanime_url
+jetanime_url = 'https://www.jetanime.cc'
 
 def getAnimeList():
     session = HTMLSession()
-    url = 'https://www.jetanime.cc'
-    r = session.get(url)
-    r.html.render()
+    r = session.get(jetanime_url)
     soup = r.html.find('body', first=True)
     options = soup.find('option')
 
     animes = []
     for option in options:
-        name = unidecode.unidecode(option.text)
-        url = urljoin(url, option.attrs['value'])
+        name = unidecode(option.text)
+        url = option.attrs['value']
         animes.append((name, url))
 
     return dict(animes)
 
-def getTitle(url):
-    session = HTMLSession()
-    r = session.get(url)
-    r.html.render()
-    soup = r.html.find('body', first=True)
-    
-    title = soup.find('div')
-    for t in title:
-        if 'col-md-12' in str(t.attrs):
-            break
-    return t.text
-    
-def getEpisodeList(url):
-    session = HTMLSession()
-    r = session.get(url)
-    r.html.render()
-    soup = r.html.find('body', first=True)
-    lines = soup.find('div')
-    episodes = []
-    for line in lines:
-        if 'sec-0' in str(line.attrs):
-            for l in line.find('a'):
-                name = unidecode.unidecode(l.text)
-                url = urljoin(url, l.attrs['href'])
-                episodes.append((name, url))
-            break
+def getAnimeName(url):
+    url = urlparse(url)
+    if str(url.path).startswith('/anime') == True:
+        _dict = getAnimeList()
+        inverted_dict = dict()
+        for key, value in _dict.items():
+            inverted_dict.setdefault(value, list()).append(key)
 
-    episodes.reverse()
-    return dict(episodes)
+        return inverted_dict[url.path]
+    else:
+        session = HTMLSession()
+        r = session.get(url.geturl())
+        soup = r.html.find('body', first=True)
+        ul = soup.find('ul')
+        for u in ul:
+            for c in dict(u.attrs):
+                if c == 'class':
+                    if list(dict(u.attrs)[c])[0] == 'breadcrumb':
+                        temp = u.find('li')
+                        return unidecode(temp[1].text)
 
 def getGounLimitedUrl(url):
     session = HTMLSession()
@@ -76,3 +68,46 @@ def getGounLimitedUrl(url):
     sauce_string = sauce.split('|')
     link = f"https://{sauce_string[-5]}.gounlimited.to/{sauce_string[-6]}/v.mp4"
     return link
+
+class vid:
+    def __init__(self, url):
+        session = HTMLSession()
+        r = session.get(url)
+        soup = r.html.find('body', first=True)
+        lines = soup.find('div')
+        episodes = []
+        for line in lines:
+            _list = line.attrs
+            for key in _list:
+                if key == 'id':
+                    if str(_list['id']).find('collapsecategory') == 0:
+                        temp = []
+                        search = line.find('a')
+                        for s in search:
+                            num = unidecode(s.text).replace('Episode ', '')
+                            link = dict(s.attrs)['href']
+                            if num.find(':') >= 0:
+                                nums = num.split(': ')
+                                number = nums[0].replace('Film ', '')
+                                name = nums[1]
+                                temp.append((number, [name, link]))
+                            elif num.find('-') >= 0:
+                                nums = num.split('-')
+                                nums.reverse()
+                                for num in nums:
+                                    temp.append((num, link))
+                            else:
+                                temp.append((num, link))
+                        temp.reverse()
+                        episodes.append(temp)
+        episodes.reverse()
+        for idx, content in enumerate(episodes):
+            episodes[idx] = dict(content)
+        self.episodes = episodes
+
+    def getEpisodeList(self):
+        return self.episodes[0]
+
+    def getFilmList(self):
+        if len(self.episodes) > 1:
+            return self.episodes[1]
