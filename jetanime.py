@@ -137,5 +137,3 @@ def getVideoUrl(url):
             except AttributeError:
                 url = 'NULL'
                 return url
-
-    
