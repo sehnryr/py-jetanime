@@ -84,17 +84,27 @@ def getAnimeName(url):
                         temp = u.find('li')
                         return unidecode(temp[1].text)
 
-def getEpisodeNum(url):
+def getNum(url):
     url = urlparse(url)
     v = vid(url.geturl())
-    _dict = v.getEpisodeList()
-    inverted_dict = dict()
-    for key, value in _dict.items():
-        inverted_dict.setdefault(value, list()).append(key)
     number = str()
-    for num in inverted_dict[url.path]:
-        number += f"{num}-"
-    return number[:-1]
+    while True:
+        try:
+            _dict = v.getEpisodeList()
+            inverted_dict = dict()
+            for key, value in _dict.items():
+                inverted_dict.setdefault(value, list()).append(key)
+            for num in inverted_dict[url.path]:
+                number += f"{num}-"
+            return number[:-1]
+        except KeyError:
+            _dict = v.getFilmList()
+            inverted_dict = dict()
+            for key, value in _dict.items():
+                inverted_dict.setdefault(value[1], list()).append(key)
+            for num in inverted_dict[url.path]:
+                number += f"{num}-"
+            return number[:-1]
 
 def getVideoUrl(url):
     session = HTMLSession()
