@@ -56,9 +56,23 @@ def getAnimeList():
     soup = r.html.find('body', first=True)
     options = soup.find('option')
 
+    def deCFEmail(fp):
+        r = int(fp[:2],16)
+        email = ''.join([chr(int(fp[i:i+2], 16) ^ r) for i in range(2, len(fp), 2)])
+        return email
+
     animes = []
     for option in options:
-        name = unidecode(option.text).replace("\n[email protected]\n", '@')
+        decoded = str()
+        temp = option.find('template')
+        if temp:
+            temps = temp[0].attrs
+            for tp in temps:
+                if tp == 'data-cfemail':
+                    decoded = deCFEmail(temps[tp])
+                    break
+
+        name = unidecode(option.text).replace('[email protected]', decoded).replace('\n', ' ')
         url = option.attrs['value']
         animes.append((name, url))
 
