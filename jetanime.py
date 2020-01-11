@@ -107,29 +107,35 @@ def getNum(url):
             return number[:-1]
 
 def getVideoUrl(url):
+
+    name = str(f"{str(getAnimeName(url)).replace('/', '%2F')} {getNum(url)} VOSTFR").replace(' ', '_')
+
     session = HTMLSession()
     r = session.get(url)
     r.html.render()
     soup = r.html.find('body', first=True)
-    a = soup.find('p')
+    iframe = soup.find('iframe')
+    url = urlparse(dict(iframe[0].attrs)['src'])
+    if str(url.netloc).find('gounlimited') >= 0:
+        session = HTMLSession()
+        r = session.get(url.geturl())
+        soup = r.html.find('body', first=True)
+        while True:
+            try:
+                sauce = soup.find('script')
+                if sauce:
+                    for spice in sauce:
+                        for key in dict(spice.attrs):
+                            if key == 'type':
+                                if len(dict(spice.attrs)) == 1:
+                                    temp = str(spice.text).split('|')
+                                    url = f"{url.scheme}://{temp[-5]}.{url.netloc}/{temp[-6]}/{name}.{temp[-7]}"
+                                    return url
+                else:
+                    url = 'NULL'
+                    return url
+            except AttributeError:
+                url = 'NULL'
+                return url
 
-    def Find(string): 
-        url = re.findall(r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', string) 
-        return url 
-
-    for i in a:
-        if 'iframe' in str(i.html):
-            link = str(i.html)
-            result = Find(link)
     
-    url = result[0]
-    session = HTMLSession()
-    r = session.get(url)
-    soup = r.html.find('script')
-    for i in soup:
-        if 'mp4' in str(i.html):
-            sauce = str(i.html)
-            break
-    sauce_string = sauce.split('|')
-    link = f"https://{sauce_string[-5]}.gounlimited.to/{sauce_string[-6]}/v.mp4"
-    return link
