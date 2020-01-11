@@ -8,6 +8,7 @@ jetanime_url = 'https://www.jetanime.cc'
 
 class vid:
     def __init__(self, url):
+        url = urljoin(jetanime_url, url)
         session = HTMLSession()
         r = session.get(url)
         soup = r.html.find('body', first=True)
@@ -57,7 +58,7 @@ def getAnimeList():
 
     animes = []
     for option in options:
-        name = unidecode(option.text)
+        name = unidecode(option.text).replace("\n[email protected]\n", '@')
         url = option.attrs['value']
         animes.append((name, url))
 
@@ -107,8 +108,7 @@ def getNum(url):
             return number[:-1]
 
 def getVideoUrl(url):
-
-    name = str(f"{str(getAnimeName(url)).replace('/', '%2F')} {getNum(url)} VOSTFR").replace(' ', '_')
+    url = urljoin(jetanime_url, url)
 
     session = HTMLSession()
     r = session.get(url)
@@ -129,7 +129,7 @@ def getVideoUrl(url):
                             if key == 'type':
                                 if len(dict(spice.attrs)) == 1:
                                     temp = str(spice.text).split('|')
-                                    url = f"{url.scheme}://{temp[-5]}.{url.netloc}/{temp[-6]}/{name}.{temp[-7]}"
+                                    url = f"{url.scheme}://{temp[-5]}.{url.netloc}/{temp[-6]}/v.{temp[-7]}"
                                     return url
                 else:
                     url = 'NULL'
