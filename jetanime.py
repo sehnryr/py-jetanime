@@ -197,3 +197,15 @@ class getLen:
             self.filmsLen = len(fms)
         else:
             self.filmsLen = 0
+
+def lastAnimeUpdate():
+    session = HTMLSession()
+    r = session.get(url)
+    soup = r.html.xpath("//div[@id='last_animes']")
+    sauce = soup[0].xpath("//a")
+    animes = list()
+    for spice in sauce:
+        name = unidecode(spice.text)
+        link = spice.attrs['href']
+        animes.append((name, link))
+    return dict(animes)
