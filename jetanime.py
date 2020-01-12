@@ -50,7 +50,7 @@ class vid:
                                                                     _list = num.split(': ', 1)
                                                                     num = _list[0].replace('Film ', '')
                                                                     name = _list[1]
-                                                                    temp_film.append((num, [link, name, lang]))
+                                                                    temp_film.append((num, [name, link, lang]))
                                                                 else:
                                                                     num = num.replace('Film ', '')
                                                                     temp_film.append((num, [link, lang]))
