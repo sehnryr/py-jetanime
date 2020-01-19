@@ -6,6 +6,19 @@ from urllib.parse import urljoin, urlparse
 global jetanime_url
 jetanime_url = 'https://www.jetanime.cc'
 
+def deCFEmail(fp):
+    r = int(fp[:2],16)
+    email = ''.join([chr(int(fp[i:i+2], 16) ^ r) for i in range(2, len(fp), 2)])
+    return email
+
+def decode(arg):
+    decoded = str()
+    temp = arg.find('template')
+    if temp:
+        temps = temp[0].attrs['data-cfemail']
+        decoded = deCFEmail(temps)
+    return unidecode(arg.text).replace('[email protected]', decoded).replace('\n', ' ')
+
 class vid:
     def __init__(self, url):
 
@@ -67,11 +80,6 @@ def getAnimeList():
     r = session.get(jetanime_url)
     soup = r.html.find('body', first=True)
     options = soup.find('option')
-
-    def deCFEmail(fp):
-        r = int(fp[:2],16)
-        email = ''.join([chr(int(fp[i:i+2], 16) ^ r) for i in range(2, len(fp), 2)])
-        return email
 
     animes = []
     for option in options:
@@ -200,7 +208,7 @@ class getLen:
 
 def lastAnimeUpdate():
     session = HTMLSession()
-    r = session.get(url)
+    r = session.get(jetanime_url)
     soup = r.html.xpath("//div[@id='last_animes']")
     sauce = soup[0].xpath("//a")
     animes = list()
