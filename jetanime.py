@@ -3,6 +3,7 @@ from requests_html import HTMLSession
 import re
 from unidecode import unidecode
 from urllib.parse import urljoin, urlparse
+import concurrent.futures
 
 global jetanime_url
 jetanime_url = 'https://www.jetanime.cc'
@@ -314,3 +315,62 @@ class getInfos:
                 pass
 
         return dict(animeInfos)
+
+def getIframe(url):
+    session = HTMLSession()
+    while True:
+        try:
+            r = session.get(url)
+            r.html.render()
+            # title = r.html.xpath("//h1")[0].text
+            infos = r.html.xpath("//div[@class='col-md-12']/div[@class='panel panel-default']")[0]
+            infos1 = infos.xpath("//p")
+
+            for info in infos1:
+                if unidecode(info.xpath("//span")[0].text) == 'Episode:':
+                    num = unidecode(info.text).replace('Episode: ', '')
+                    break
+
+            link = str(r.html.xpath("//iframe")[0].attrs['src'])
+            return num, link
+        except:
+            print('err', end=' ')
+            pass
+
+def getDirectLink(soup):
+    session = HTMLSession()
+    while True:
+        try:
+            num = soup[0]
+            url = soup[1]
+            r = session.get(url)
+            soup = r.html.xpath("//script[@type='text/javascript']")
+            sauce = unidecode(soup[-1].text).split('|')
+            link = f"{sauce[12]}://{sauce[-5]}.{sauce[11]}.{sauce[10]}/{sauce[-6]}/v.mp4"
+            return num, link
+        except:
+            print('err', end=' ')
+            pass
+
+def getGounLimited(url):
+    N = 4
+
+    mediaLink = list()
+    animeInfos = vid(url).episodes
+    episodeList = [urljoin(jetanime_url, animeInfos[episode][0]) for episode in animeInfos]
+
+    episodeGroup = [episodeList[n:n+N] for n in range(0, len(episodeList), N)]
+    for episodes in episodeGroup:
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            results = executor.map(getIframe, episodes)
+            for result in results:
+                mediaLink.append(result)
+    mediaGroup = [mediaLink[n:n+N] for n in range(0, len(mediaLink), N)]
+    mediaLink = list()
+    for media in mediaGroup:
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            results = executor.map(getDirectLink, media)
+            for result in results:
+                mediaLink.append(result)
+    mediaLink = dict(mediaLink)
+    return mediaLink
