@@ -1,3 +1,4 @@
+import sys
 from requests_html import HTMLSession
 import re
 from unidecode import unidecode
@@ -217,3 +218,99 @@ def lastAnimeUpdate():
         link = spice.attrs['href']
         animes.append((name, link))
     return dict(animes)
+
+class getInfos:
+    def __init__(self, url):
+        self.url = urljoin(jetanime_url, url)
+        self.session = HTMLSession()
+        r = self.session.get(self.url)
+        try:
+            self.infos = r.html.xpath("//div[@class='col-md-12']/div[@class='panel panel-default']")
+            self.animeName = self.infos[1].xpath("//h4")[0].text
+        except:
+            print(sys.exc_info()[0])
+            pass
+    
+    def media(self):
+        soup = self.infos[0].xpath("//p")
+        mediaInfos = ['title', 'num', 'date', 'vo', 'vost', 'anime']
+        for idx, info in enumerate(mediaInfos):
+            mediaInfos[idx] = [info]
+        for idx, s in enumerate(soup):
+            try:
+                span = unidecode(s.xpath("//span")[0].text)
+                sauce = unidecode(s.text).replace(f"{span} ", '')
+                if sauce == span:
+                    sauce = s.xpath("//i")[0].attrs['class'][1].split('-')[1]
+                soup[idx] = [span.replace(':', ''), sauce]
+            except:
+                pass
+        soup = dict(soup)
+        for idx, info in enumerate(mediaInfos):
+            try:
+                if info[0] == 'title':
+                    info.append(soup['Titre'])
+                    mediaInfos[idx] = info
+                if info[0] == 'num':
+                    info.append(soup['Episode'])
+                    mediaInfos[idx] = info
+                if info[0] == 'vo':
+                    info.append(soup['Langue'])
+                    mediaInfos[idx] = info
+                if info[0] == 'vost':
+                    info.append(soup['Sous Titre'])
+                    mediaInfos[idx] = info
+                if info[0] == 'date':
+                    info.append(soup["Date d'ajout"])
+                    mediaInfos[idx] = info
+                if info[0] == 'anime':
+                    info.append(self.animeName)
+                    mediaInfos[idx] = info
+            except:
+                pass
+        return dict(mediaInfos)
+
+    def anime(self):
+        soup = self.infos[1].text
+        spices = soup.split('\n')
+        spices.pop(0)
+        for idx, spice in enumerate(spices):
+            spices[idx] = spice.split(': ', 1)
+        spices = dict(spices)
+        animeInfos = ['name', 'originalName', 'alternativeName', 'genres', 'autors', 'studios', 'date', 'synopsis', 'poster']
+        for idx, info in enumerate(animeInfos):
+            animeInfos[idx] = [info]
+        for idx, info in enumerate(animeInfos):
+            try:
+                if info[0] == 'name':
+                    info.append(spices['Nom'])
+                    animeInfos[idx] = info
+                if info[0] == 'originalName':
+                    info.append(spices['Nom original'])
+                    animeInfos[idx] = info
+                if info[0] == 'alternativeName':
+                    info.append(unidecode(spices['Nom Alternatif']).split(', '))
+                    animeInfos[idx] = info
+                if info[0] == 'genres':
+                    info.append(unidecode(spices['Genre(s)']).split(', '))
+                    animeInfos[idx] = info
+                if info[0] == 'autors':
+                    info.append(unidecode(spices['Auteur(s)']).split(', '))
+                    animeInfos[idx] = info
+                if info[0] == 'studios':
+                    info.append(unidecode(spices['Studio(s)']).split(', '))
+                    animeInfos[idx] = info
+                if info[0] == 'date':
+                    info.append(unidecode(spices['Date de Sortie']))
+                    animeInfos[idx] = info
+                if info[0] == 'synopsis':
+                    info.append(unidecode(spices['Synopsis']))
+                    animeInfos[idx] = info
+                if info[0] == 'poster':
+                    info.append(urljoin(jetanime_url, self.infos[1].xpath("//img")[0].attrs['src']))
+                    animeInfos[idx] = info
+            except:
+                print(sys.exc_info()[0])
+                pass
+
+        return dict(animeInfos)
